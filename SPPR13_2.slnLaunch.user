@@ -1,0 +1,15 @@
+[
+  {
+    "Name": "New Profile",
+    "Projects": [
+      {
+        "Path": "SPPR13_2\\SPPR13_2.csproj",
+        "Action": "Start"
+      },
+      {
+        "Path": "SPPR13_2.Client\\SPPR13_2.Client.csproj",
+        "Action": "Start"
+      }
+    ]
+  }
+]

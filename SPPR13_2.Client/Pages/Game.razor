@@ -1,0 +1,133 @@
+﻿@page "/game"
+@rendermode InteractiveWebAssembly
+@inject NavigationManager Navigation
+@using SPPR13_2.Client.Entities
+
+<PageTitle>Game</PageTitle>
+
+
+@* <script> *@
+@* window.MAPSIZE = "@Rules.MapSize" *@
+@* </script> *@
+<script src="../js/JavaScript.js"></script>
+
+@code {
+	private static HubConnection connection;
+
+	private static TimerCallback timerCallback;
+	private static Timer timer;
+
+	[Inject] private IJSRuntime JS { get; set; }
+	DotNetObjectReference<Game> thisObject;
+
+	protected override async Task OnInitializedAsync()
+	{
+		connection = new HubConnectionBuilder().WithUrl(Navigation.ToAbsoluteUri("/hub")).WithAutomaticReconnect().Build();
+		thisObject = DotNetObjectReference.Create(this);
+	}
+
+	protected override async Task OnAfterRenderAsync(bool firstRender)
+	{
+		if (firstRender)
+		{
+			await SetName(PlayerNameContainer.PlayerName, PlayerNameContainer.Server);
+			await JS.InvokeVoidAsync("SetDotNetObject", thisObject);
+		}
+	}
+
+	private void StartTimer()
+	{
+		timerCallback = new TimerCallback(UpdateAllPlayers);
+		timer = new Timer(timerCallback, null, 50, Rules.TimerPeriod);
+	}
+
+	public void UpdateAllPlayers(object obj)
+	{
+		connection.SendAsync("UpdateAllPlayers");
+		// StateHasChanged();
+	}
+
+	public async Task SetName(string name, string server)
+	{
+		// SecondPage = true;
+
+		// var task = Task.Run(()=>StateHasChanged());
+		// Task.WaitAll(task);
+
+		connection.On<Player>("LoadPlayer", (player) =>
+		{
+			JS.InvokeVoidAsync("LoadPlayer", player);
+		});
+
+		connection.On<List<Food>>("LoadMap", (foods) =>
+		{
+			JS.InvokeVoidAsync("LoadMap", foods);
+		});
+
+		connection.On<List<Player>>("UpdateAllPlayers", (players) =>
+		{
+			JS.InvokeVoidAsync("UpdateAllPlayers", players);
+		});
+
+		connection.On<List<Food>>("AddFood", (food) =>
+		{
+			JS.InvokeVoidAsync("AddFood", food);
+		});
+
+		connection.On<int>("DeleteFood", (index) =>
+		{
+			JS.InvokeVoidAsync("DeleteFood", index);
+		});
+
+		connection.On<string>("ResetPlayer", (victim_id) =>
+		{
+			JS.InvokeVoidAsync("ResetPlayer", victim_id);
+		});
+
+
+		await connection.StartAsync();
+
+		await connection.SendAsync("CreatePlayerAndLoadMap", name, server);
+		// await connection.SendAsync("LoadMap");
+
+		StartTimer();
+	}
+
+	[JSInvokable]
+	public async Task NewSize(string player_id)
+	{
+		await connection.SendAsync("NewSize", player_id);
+	}
+
+	[JSInvokable]
+	public async Task EatFood(int index)
+	{
+		await connection.SendAsync("EatFood", index);
+	}
+
+	[JSInvokable]
+	public async Task Kill(string victimId, string killerId)
+	{
+		await connection.SendAsync("Kill", victimId, killerId);
+	}
+
+	[JSInvokable]
+	public async Task Move(string player_id, double new_mouse_x, double new_mouse_y)
+	{
+		await connection.SendAsync("Move", player_id, new_mouse_x, new_mouse_y);
+	}
+
+	[JSInvokable]
+	public async Task DeletePlayer(string player_id)
+	{
+		await connection.SendAsync("EndPlay", player_id);
+		await connection.DisposeAsync();
+		Navigation.NavigateTo("");
+	}
+
+	[JSInvokable]
+	public void WriteLine()
+	{
+		Console.WriteLine("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
+	}
+}

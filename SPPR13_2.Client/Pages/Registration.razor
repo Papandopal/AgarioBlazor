@@ -1,0 +1,39 @@
+﻿@page "/"
+@rendermode InteractiveWebAssembly
+@using Microsoft.AspNetCore.Components.Web
+@using Microsoft.AspNetCore.Http
+@inject NavigationManager navigation
+
+<div class="form-group">
+	<label>
+		UserName:
+		<input @bind="userNameInput" />
+	</label>
+</div>
+
+<select @bind="serverName" class="form-select" aria-label="Default select example">
+	<option selected value="One">One</option>
+	<option value="Two">Two</option>
+	<option value="Three">Three</option>
+</select>
+
+<button @onclick="SendName">Send</button>
+
+
+@code {
+	private string userNameInput;
+	private string serverName = "One";
+
+	protected override void OnInitialized()
+	{
+		StateHasChanged();
+	}
+
+	void SendName()
+	{
+		PlayerNameContainer.PlayerName = userNameInput;
+		PlayerNameContainer.Server = serverName;
+
+		navigation.NavigateTo("game");
+	}
+}

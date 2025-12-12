@@ -1,0 +1,31 @@
+﻿using SPPR13_2.Client.CustomCollections;
+
+namespace SPPR13_2.Client.Entities
+{
+    public static class EntitiesService
+    {
+        public static int GetRandCoord()
+        {
+
+            while(Rules.MapSize==0) { continue; }
+
+            var rand = new Random();
+            return rand.Next(10, Rules.MapSize-10);
+        }
+        public static string GetRandColor()
+        {
+            var rand = new Random();
+            return Rules.Colors[rand.Next(0, Rules.Colors.Count)];
+        }
+        public static ConcurrentList<Food> GetRandFoods(int count)
+        {
+            var foods = new ConcurrentList<Food>();
+            for (int i = 0; i < count; i++)
+            {
+                var c = new Food();
+                foods.Add(c);
+            }
+            return foods;
+        }
+    }
+}
