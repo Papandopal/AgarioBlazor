@@ -1,19 +1,17 @@
 #!/bin/bash
 
-cloudflared tunnel --url http://localhost:5000 > cloudflared.log 2>&1 &
+echo "Restoring packages..."
+dotnet restore
 
-sleep 10
+echo "Building project..."
+dotnet build -c Release
 
-TUNNEL_URL=$(grep -oP 'https://[a-zA-Z0-9-]+\.trycloudflare\.com' cloudflared.log)
+echo "Publishing..."
+dotnet publish -c Release -o /app/out
 
-if [ -z "$TUNNEL_URL" ]; then
-  echo "Ошибка: не удалось получить URL туннеля. Проверьте cloudflared.log."
-  cat cloudflared.log
-  exit 1
-fi
+echo "Starting Cloudflare Tunnel..."
+cloudflared tunnel --url http://0.0.0.0:8080 &
 
-echo " "
-echo "Ваша игра доступна по адресу: $TUNNEL_URL"
-echo " "
-
+echo "Starting ASP.NET app..."
+cd /app/out
 dotnet SPPR13_2.dll

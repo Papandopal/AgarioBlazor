@@ -10,12 +10,14 @@
 		<input @bind="userNameInput" />
 	</label>
 </div>
-
-<select @bind="serverName" class="form-select" aria-label="Default select example">
-	<option selected value="One">One</option>
-	<option value="Two">Two</option>
-	<option value="Three">Three</option>
-</select>
+<div>
+	<label>Server:</label>
+	<select @bind="serverName" class="form-select" aria-label="Default select example">
+		<option selected value="One">One</option>
+		<option value="Two">Two</option>
+		<option value="Three">Three</option>
+	</select>
+</div>
 
 <button @onclick="SendName">Send</button>
 

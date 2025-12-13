@@ -149,7 +149,7 @@ function draw() {
 
         if (!cur_player.isDead && point.player_id != cur_player.player_id && point.size * visibility > cur_player.size * visibility && Math.sqrt(Math.pow(point.x - cur_player.x, 2) + Math.pow(point.y - cur_player.y, 2)) * 1.2 < point.size * visibility) {
             //ws.send(['kill', 'victim_id:', cur_player.user_id.toString(), 'killer_id:', point.user_id.toString()].join(' '))
-            //если не ифа,то вызывается тем, кого убили
+            //если нет ифа,то вызывается тем, кого убили
             if (players.dotNetObj !== null) players.dotNetObj.invokeMethodAsync("Kill", cur_player.player_id, point.player_id)
             cur_player.isDead = true
         }
@@ -175,7 +175,7 @@ function draw() {
 
     for (let point of players.points) {
         ctx.beginPath()
-        ctx.arc(Math.min(Math.max((point.x / MAPSIZE) * size_of_map + window.innerWidth - size_of_map, window.innerWidth - size_of_map + size_of_point_on_map), window.innerWidth - size_of_point_on_map), Math.min(Math.max((point.x / MAPSIZE) * size_of_map, size_of_point_on_map), size_of_map - size_of_point_on_map), size_of_point_on_map, 0, Math.PI * 2)
+        ctx.arc(Math.min(Math.max((point.x / MAPSIZE) * size_of_map + window.innerWidth - size_of_map, window.innerWidth - size_of_map + size_of_point_on_map), window.innerWidth - size_of_point_on_map), Math.min(Math.max((point.y / MAPSIZE) * size_of_map, size_of_point_on_map), size_of_map - size_of_point_on_map), size_of_point_on_map, 0, Math.PI * 2)
         ctx.fillStyle = colors[parseInt(point.player_id[0], 16) % colors.length]
         ctx.fill();
     }
