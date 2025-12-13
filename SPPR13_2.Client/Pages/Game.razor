@@ -22,7 +22,7 @@
 
 	protected override async Task OnInitializedAsync()
 	{
-		connection = new HubConnectionBuilder().WithUrl(Navigation.ToAbsoluteUri("/hub")).WithAutomaticReconnect().Build();
+		connection = new HubConnectionBuilder().WithUrl(Navigation.ToAbsoluteUri("/hub")).Build();
 		thisObject = DotNetObjectReference.Create(this);
 	}
 
@@ -84,6 +84,11 @@
 			JS.InvokeVoidAsync("ResetPlayer", victim_id);
 		});
 
+		connection.Closed += (e) =>
+		{
+			JS.InvokeVoidAsync("ResetCurrentPlayer");
+			return null;
+		};
 
 		await connection.StartAsync();
 
@@ -92,6 +97,8 @@
 
 		StartTimer();
 	}
+
+
 
 	[JSInvokable]
 	public async Task NewSize(string player_id)

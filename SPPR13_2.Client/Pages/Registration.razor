@@ -8,7 +8,8 @@
 	<label>
 		UserName:
 		<input @bind="userNameInput" />
-	</label>
+	</label>	
+	<label>@errmsg</label>
 </div>
 <div>
 	<label>Server:</label>
@@ -25,14 +26,15 @@
 @code {
 	private string userNameInput;
 	private string serverName = "One";
-
-	protected override void OnInitialized()
-	{
-		StateHasChanged();
-	}
+	private string errmsg;
 
 	void SendName()
 	{
+		if(userNameInput == string.Empty)
+		{
+			errmsg = "Name must be not null";
+			StateHasChanged();
+		}
 		PlayerNameContainer.PlayerName = userNameInput;
 		PlayerNameContainer.Server = serverName;
 

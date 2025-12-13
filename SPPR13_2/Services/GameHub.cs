@@ -56,6 +56,8 @@ namespace SPPR13_2.Services
             cur_model = Context.Items["model"] as Model;
 
             await Clients.Group(cur_server).SendAsync("UpdateAllPlayers", cur_model.Players.ToList());
+
+            Context.Items["server"] = cur_server;
         }
 
         public async Task UpdatePlayer(Player player)

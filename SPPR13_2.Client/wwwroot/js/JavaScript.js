@@ -1,6 +1,4 @@
-﻿
-
-var scene = document.createElement("canvas")
+﻿var scene = document.createElement("canvas")
 var MAPSIZE = 5000;
 scene.width = MAPSIZE
 scene.height = MAPSIZE
@@ -64,7 +62,6 @@ function UpdateAllPlayers(updatedPlayers) {
 
 function LoadMap(map) {
     players.circles = map
-    console.log("ofnjnd", map)
 }
 
 function UpdateMap(new_food) {
@@ -90,35 +87,36 @@ function ResetPlayer(victim_id) {
     }
 }
 
+function ResetCurrentPlayer() {
+    if (players.dotNetObj !== null) {
+        players.dotNetObj.invokeMethodAsync("DeletePlayer", cur_player.player_id)
+        players.dotNetObj = null
+    }
+}
+
+if(window.onunload !== ResetCurrentPlayer) window.onunload = ResetCurrentPlayer
+
 function draw() {
+
     ctx.clearRect(0, 0, canvas.width, canvas.height)
     ctx.font = "20px Arial"
     ctx.fillStyle = "black"
     ctx.fillText(`Radius: ${cur_player.size}`, 10, 30, 1000)
-
+   
     let index = 0;
 
     for (let circle of players.circles) {
-
-        //console.log(cur_player)
-        //console.log(players.points)
-        //console.log("--------------------------------------")
 
         const screenX = (circle.x - cur_player.x) * visibility + canvas.width / 2;
         const screenY = (circle.y - cur_player.y) * visibility + canvas.height / 2;
 
         if (!circle.is_eated && Math.pow(circle.x - cur_player.x, 2) + Math.pow(circle.y - cur_player.y, 2) <= cur_player.size * cur_player.size) {
-            //ws.send(['new_size', cur_player.user_id.toString()].join(' '))
-            //ws.send(['eat_food', 'index_of_circle', circles.indexOf(circle).toString()].join(' '))
+            circle.is_eated = true
             players.dotNetObj.invokeMethodAsync("NewSize", cur_player.player_id)
             players.dotNetObj.invokeMethodAsync("EatFood", index)
-            circle.is_eated = true
             continue
         }
 
-        //console.log(screenX, cur_player, circle, circle.size, visibility)
-        //console.log(screenX + circle.size * visibility, screenY + circle.size * visibility > 0, screenX - circle.size * visibility < canvas.width,
-        //screenY - circle.size * visibility < canvas.height)
         if (
             screenX + circle.size * visibility > 0 &&
             screenY + circle.size * visibility > 0 &&
@@ -138,18 +136,13 @@ function draw() {
         const screenX = (point.x - cur_player.x) * visibility + canvas.width / 2;
         const screenY = (point.y - cur_player.y) * visibility + canvas.height / 2;
 
-        //if (point.user_id == cur_player.user_id) { console.log('aboba') }
-
         if (!point.isDead && point.player_id != cur_player.player_id && point.size * visibility < cur_player.size * visibility && Math.sqrt(Math.pow(point.x - cur_player.x, 2) + Math.pow(point.y - cur_player.y, 2)) * 1.2 < cur_player.size * visibility) {
-            //ws.send(['kill', 'victim_id:', point.user_id.toString(), 'killer_id:', cur_player.user_id.toString()].join(' '))
             players.dotNetObj.invokeMethodAsync("Kill", point.player_id, cur_player.player_id)
             point.isDead = true
             if (point.player_id == cur_player.player_id) cur_player.isDead = true
         }
 
         if (!cur_player.isDead && point.player_id != cur_player.player_id && point.size * visibility > cur_player.size * visibility && Math.sqrt(Math.pow(point.x - cur_player.x, 2) + Math.pow(point.y - cur_player.y, 2)) * 1.2 < point.size * visibility) {
-            //ws.send(['kill', 'victim_id:', cur_player.user_id.toString(), 'killer_id:', point.user_id.toString()].join(' '))
-            //если нет ифа,то вызывается тем, кого убили
             if (players.dotNetObj !== null) players.dotNetObj.invokeMethodAsync("Kill", cur_player.player_id, point.player_id)
             cur_player.isDead = true
         }
@@ -193,7 +186,5 @@ document.addEventListener('mousemove', e => {
     var data_x, data_y
     data_x = e.clientX - canvas.width / 2;
     data_y = e.clientY - canvas.height / 2;
-    //ws.send([`move`, 'index:', cur_player.user_id.toString(), 'X:', data_x.toString(), 'Y:', data_y.toString()].join(" "))
-    //console.log(cur_player);
     if (players.dotNetObj !== null) players.dotNetObj.invokeMethodAsync("Move", cur_player.player_id, data_x, data_y)
 })
