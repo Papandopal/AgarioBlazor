@@ -28,10 +28,10 @@ var visibility = 1.0
 var ViewMap = false
 
 function SetDotNetObject(dotNetObject) {
-    players.dotNetObj = dotNetObject;
+    players.dotNetObj = dotNetObject
 }
 
-function LoadPlayer(player) {
+function LoadPlayer(player, server) {
     cur_player.x = Math.max(Math.min(player.x, MAPSIZE), 0)
     cur_player.y = Math.max(Math.min(player.y, MAPSIZE), 0)
     cur_player.player_id = player.player_id
@@ -39,6 +39,9 @@ function LoadPlayer(player) {
     cur_player.speed = player.speed
     cur_player.name = player.name
     cur_player.isDead = player.isDead
+
+    sessionStorage.setItem("player_id", cur_player.player_id)
+    sessionStorage.setItem("server", server)
 }
 
 function UpdateAllPlayers(updatedPlayers) {
@@ -94,15 +97,36 @@ function ResetCurrentPlayer() {
     }
 }
 
-if(window.onunload !== ResetCurrentPlayer) window.onunload = ResetCurrentPlayer
+function GetSessionPlayerId() {
+    //var state = performance.getEntriesByType('navigation')[0].type === 'reload';
+    //if (state) {
+        
+    //    return sessionStorage.getItem("player_id") + ' ' + sessionStorage.getItem("server")
+    //}
+    //return null
 
+    const reloaded = sessionStorage.getItem('isReload');
+    if (reloaded === 'true') {
+        sessionStorage.removeItem('isReload');
+        return sessionStorage.getItem("player_id") + ' ' + sessionStorage.getItem("server")
+    } else {
+        sessionStorage.setItem('isReload', 'true');
+        return null;
+    }
+}
+
+function HistoryBack() {
+    window.history.back();
+}
+
+if (window.onunload !== ResetCurrentPlayer) window.onunload = ResetCurrentPlayer
 function draw() {
 
     ctx.clearRect(0, 0, canvas.width, canvas.height)
     ctx.font = "20px Arial"
     ctx.fillStyle = "black"
     ctx.fillText(`Radius: ${cur_player.size}`, 10, 30, 1000)
-   
+
     let index = 0;
 
     for (let circle of players.circles) {

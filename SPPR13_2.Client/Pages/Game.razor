@@ -16,9 +16,10 @@
 
 	private static TimerCallback timerCallback;
 	private static Timer timer;
+	private static DotNetObjectReference<Game> thisObject;
 
 	[Inject] private IJSRuntime JS { get; set; }
-	DotNetObjectReference<Game> thisObject;
+
 
 	protected override async Task OnInitializedAsync()
 	{
@@ -28,10 +29,19 @@
 
 	protected override async Task OnAfterRenderAsync(bool firstRender)
 	{
+
 		if (firstRender)
 		{
 			await SetName(PlayerNameContainer.PlayerName, PlayerNameContainer.Server);
 			await JS.InvokeVoidAsync("SetDotNetObject", thisObject);
+		}
+
+		var id = await JS.InvokeAsync<string>("GetSessionPlayerId");
+		if (id is not null) {
+			var strs = id.Split(' ');
+			await connection.SendAsync("EndPlayOnReload", strs[0], strs[1]);
+			// await connection.DisposeAsync();
+			await JS.InvokeVoidAsync("HistoryBack");
 		}
 	}
 
@@ -43,7 +53,8 @@
 
 	public void UpdateAllPlayers(object obj)
 	{
-		connection.SendAsync("UpdateAllPlayers");
+
+		connection.SendAsync("UpdateAllPlayers"); 
 		// StateHasChanged();
 	}
 
@@ -54,9 +65,9 @@
 		// var task = Task.Run(()=>StateHasChanged());
 		// Task.WaitAll(task);
 
-		connection.On<Player>("LoadPlayer", (player) =>
+		connection.On<Player, string>("LoadPlayer", (player, server) =>
 		{
-			JS.InvokeVoidAsync("LoadPlayer", player);
+			JS.InvokeVoidAsync("LoadPlayer", player, server);
 		});
 
 		connection.On<List<Food>>("LoadMap", (foods) =>
@@ -84,11 +95,16 @@
 			JS.InvokeVoidAsync("ResetPlayer", victim_id);
 		});
 
-		connection.Closed += (e) =>
+		connection.On("RedirectToRegistration", () =>
 		{
-			JS.InvokeVoidAsync("ResetCurrentPlayer");
-			return null;
-		};
+			Navigation.NavigateTo("");
+		});
+
+		// connection.Closed += (e) =>
+		// {
+		// 	JS.InvokeVoidAsync("ResetCurrentPlayer");
+		// 	return null;
+		// };
 
 		await connection.StartAsync();
 

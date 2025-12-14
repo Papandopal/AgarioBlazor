@@ -29,6 +29,7 @@ namespace SPPR13_2.Client.Entities
         public bool isDead { get; set; } = false;
         public double mouse_x { get; set; }
         public double mouse_y { get; set; }
+        public string server {  get; set; }
 
         private TimerCallback time_call_back;
         private Timer timer;
@@ -38,7 +39,6 @@ namespace SPPR13_2.Client.Entities
             time_call_back = new TimerCallback(GoToMouse);
             timer = new Timer(time_call_back, null, 0, Rules.TimerPeriod);
         }
-
         public void Move(double new_mouse_x, double new_mouse_y)
         {
             mouse_x = new_mouse_x;
